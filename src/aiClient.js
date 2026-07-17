@@ -47,6 +47,9 @@ export function showGlobalUpgradeModal(message) {
         <div style="font-size:12px;margin-top:4px;opacity:0.9;">${(message || '本日の無料お試し回数の上限に達しました。').replace(/</g, '&lt;')}</div>
       </div>
       <div style="padding:20px;">
+        <div style="font-size:11px;line-height:1.6;color:#8A8F84;margin-bottom:14px;">
+          ※お試し版は大勢の方が同時にご利用になると、一時的にAIの制限がかかる場合がございます。ご了承ください。
+        </div>
         <div style="border-radius:12px;padding:14px;background:#F2F1EC;margin-bottom:12px;">
           <div style="font-size:13px;font-weight:700;color:#3D8C7A;margin-bottom:4px;">継続してご利用いただくには</div>
           <div style="font-size:12px;line-height:1.6;color:#5A6B6E;">月額プランへのお申し込みで、翌日以降も回数制限なくご利用いただけます。</div>
