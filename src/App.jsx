@@ -345,7 +345,7 @@ function ChatScreen({ profile, avatar }) {
       <div className="flex gap-2 items-end px-4 py-3" style={{ background: '#fff', borderTop: '1px solid #E5DFD3' }}>
         <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="メッセージを送る"
           className="flex-1 rounded-2xl px-4 py-2.5 text-sm outline-none resize-none" style={{ background: '#F5F0E8', color: '#3D3D3D', border: 'none' }}
-          rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+          rows={1} />
         <button onClick={send} disabled={isLoading} className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-50" style={{ background: '#7BB8A4', color: '#fff' }}>➤</button>
       </div>
     </div>
