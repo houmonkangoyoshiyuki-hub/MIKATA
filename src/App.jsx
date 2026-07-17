@@ -298,7 +298,7 @@ function ChatScreen({ profile, avatar }) {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
+    <div className="flex flex-col fixed inset-0" style={{ bottom: 64, background: '#F5F0E8' }}>
       <div className="flex items-center justify-between px-4 py-3" style={{ background: '#fff', borderBottom: '1px solid #E5DFD3' }}>
         <div className="flex items-center gap-2">
           <AvatarBadge avatar={avatar} size={32} />
@@ -389,7 +389,7 @@ ${todayText}`;
   };
 
   return (
-    <div className="px-4 py-4 overflow-y-auto" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
+    <div className="px-4 py-4 overflow-y-auto fixed inset-0" style={{ bottom: 64, background: '#F5F0E8' }}>
       <div className="rounded-2xl p-4 mb-4" style={{ background: '#fff' }}>
         <div className="text-xs font-bold mb-2" style={{ color: '#8A8A8A' }}>{new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}</div>
         <textarea value={todayText} onChange={(e) => setTodayText(e.target.value)} placeholder="今日あったこと、感じたことを自由に書いてください"
@@ -463,7 +463,7 @@ ${diaryText || '(なし)'}`;
   };
 
   return (
-    <div className="px-4 py-4 overflow-y-auto" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
+    <div className="px-4 py-4 overflow-y-auto fixed inset-0" style={{ bottom: 64, background: '#F5F0E8' }}>
       <button onClick={generate} disabled={isLoading} className="w-full py-4 rounded-2xl text-sm font-bold disabled:opacity-50 mb-4" style={{ background: '#7BB8A4', color: '#fff' }}>
         {isLoading ? 'まとめています…' : '✨ 気持ちをまとめる'}
       </button>
@@ -501,7 +501,7 @@ function SettingsScreen({ profile, setProfile, avatar, setAvatar }) {
   };
 
   return (
-    <div className="px-4 py-4 overflow-y-auto space-y-4" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
+    <div className="px-4 py-4 overflow-y-auto space-y-4 fixed inset-0" style={{ bottom: 64, background: '#F5F0E8' }}>
       <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: '#fff' }}>
         <AvatarBadge avatar={avatar} size={48} />
         <div className="flex-1">
