@@ -55,7 +55,7 @@ function buildSystemPrompt(profile, avatar, mode, userIsMinor) {
 8. 恋人・パートナーのような振る舞いは一切しないこと${userIsMinor ? '\n9. ユーザーは未成年の可能性があります。親密な言葉遣い・スキンシップを連想させる表現は一切避け、より一段と丁寧で保護的な距離感を保ってください。' : ''}`;
 
   if (mode === 'listen') {
-    return base + `\n\n現在は「向き合うモード」（傾聴モード）です。
+    return base + `\n\n現在は「親身に相談モード」（傾聴モード）です。
 - 解決策・アドバイスは求められるまで言わない
 - 相手の言葉を繰り返して共感を示す
 - 感情を深掘りする質問をする（例:「それはどんな気持ちだった？」）
@@ -83,8 +83,13 @@ function OnboardStep1({ onNext }) {
     <div className="flex flex-col items-center justify-center min-h-screen px-6" style={{ background: '#F5F0E8' }}>
       <div className="text-5xl mb-4">🌿</div>
       <div className="text-2xl font-bold mb-2" style={{ color: '#3D3D3D' }}>ずっとMIKATA</div>
-      <div className="text-sm text-center mb-8 leading-relaxed" style={{ color: '#6B6B6B' }}>
+      <div className="text-sm text-center mb-5 leading-relaxed" style={{ color: '#6B6B6B' }}>
         毎日話せる、あなたの味方。<br />チャットと交換日記で、自分と向き合えます。
+      </div>
+      <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-xs">
+        {['💬 いつでも話せるAI', '📖 交換日記で振り返る', '🔒 データは端末内のみ', '🙅 カウンセリングではない'].map((tag) => (
+          <span key={tag} className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: '#fff', color: '#7BB8A4', border: '1px solid #DCE9E3' }}>{tag}</span>
+        ))}
       </div>
       <button onClick={onNext} className="w-full max-w-xs py-4 rounded-2xl text-base font-bold" style={{ background: '#7BB8A4', color: '#fff' }}>
         はじめる
@@ -153,6 +158,17 @@ function OnboardStep3({ onComplete }) {
   const [tone, setTone] = useState('優しい');
   const [relationship, setRelationship] = useState('先輩');
   const [icon, setIcon] = useState(AVATAR_ICONS[0]);
+  const [photoData, setPhotoData] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) { alert('写真のサイズが大きすぎます（3MB以下にしてください）'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setPhotoData(reader.result);
+    reader.readAsDataURL(file);
+  };
 
   const Picker = ({ label, options, value, setValue }) => (
     <div className="mb-5">
@@ -174,11 +190,26 @@ function OnboardStep3({ onComplete }) {
       <div className="text-xs mb-6" style={{ color: '#8A8A8A' }}>あとから設定でいつでも変更できます</div>
 
       <div className="mb-5">
-        <div className="text-xs font-bold mb-2" style={{ color: '#6B6B6B' }}>アイコン</div>
+        <div className="text-xs font-bold mb-2" style={{ color: '#6B6B6B' }}>写真を選ぶ（任意）</div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => fileInputRef.current?.click()} className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0"
+            style={{ background: '#fff', border: photoData ? '2px solid #5F9A85' : '1px dashed #C9C2B3' }}>
+            {photoData ? <img src={photoData} alt="" className="w-full h-full object-cover" /> : <span style={{ fontSize: 22, color: '#C9C2B3' }}>＋</span>}
+          </button>
+          <div className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>
+            お気に入りの写真・イラストを選べます。写真はこの端末だけに保存され、外部には送信されません。
+            {photoData && <button onClick={() => setPhotoData('')} className="block mt-1 font-bold" style={{ color: '#A0453F' }}>写真を外す</button>}
+          </div>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+        </div>
+      </div>
+
+      <div className="mb-5">
+        <div className="text-xs font-bold mb-2" style={{ color: '#6B6B6B' }}>{photoData ? 'または、アイコンを選ぶ' : 'アイコン'}</div>
         <div className="flex flex-wrap gap-2">
           {AVATAR_ICONS.map((ic) => (
-            <button key={ic} onClick={() => setIcon(ic)} className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
-              style={icon === ic ? { background: '#7BB8A4', border: '2px solid #5F9A85' } : { background: '#fff', border: '1px solid #E5DFD3' }}>
+            <button key={ic} onClick={() => { setIcon(ic); setPhotoData(''); }} className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
+              style={!photoData && icon === ic ? { background: '#7BB8A4', border: '2px solid #5F9A85' } : { background: '#fff', border: '1px solid #E5DFD3' }}>
               {ic}
             </button>
           ))}
@@ -189,7 +220,7 @@ function OnboardStep3({ onComplete }) {
       <Picker label="口調" options={TONES} value={tone} setValue={setTone} />
       <Picker label="関係性" options={RELATIONSHIPS} value={relationship} setValue={setRelationship} />
 
-      <button onClick={() => onComplete({ gender, ageFeel, tone, relationship, icon })}
+      <button onClick={() => onComplete({ gender, ageFeel, tone, relationship, icon, photo: photoData })}
         className="w-full py-4 rounded-2xl text-base font-bold mt-4" style={{ background: '#7BB8A4', color: '#fff' }}>
         この内容ではじめる
       </button>
@@ -198,6 +229,15 @@ function OnboardStep3({ onComplete }) {
 }
 
 // ── チャット画面 ──
+// ── アバター表示（写真があれば写真、なければアイコン） ──
+function AvatarBadge({ avatar, size = 28 }) {
+  return (
+    <div className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ width: size, height: size, background: '#fff', fontSize: size * 0.55 }}>
+      {avatar?.photo ? <img src={avatar.photo} alt="" className="w-full h-full object-cover" /> : (avatar?.icon || '🌿')}
+    </div>
+  );
+}
+
 function ChatScreen({ profile, avatar }) {
   const [mode, setMode] = useState(() => { try { return localStorage.getItem(K_MODE) || 'talk'; } catch (e) { return 'talk'; } });
   const [history, setHistory] = useState(() => {
@@ -261,14 +301,14 @@ function ChatScreen({ profile, avatar }) {
     <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
       <div className="flex items-center justify-between px-4 py-3" style={{ background: '#fff', borderBottom: '1px solid #E5DFD3' }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#F5F0E8', fontSize: 16 }}>{avatar.icon}</div>
+          <AvatarBadge avatar={avatar} size={32} />
           <span className="text-sm font-bold" style={{ color: '#3D3D3D' }}>MIKATA</span>
         </div>
         <div className="flex rounded-full p-0.5" style={{ background: '#F0EBE0' }}>
           <button onClick={() => setMode('talk')} className="text-xs font-bold px-3 py-1.5 rounded-full"
             style={mode === 'talk' ? { background: '#7BB8A4', color: '#fff' } : { color: '#8A8A8A' }}>💬 話す</button>
           <button onClick={() => setMode('listen')} className="text-xs font-bold px-3 py-1.5 rounded-full"
-            style={mode === 'listen' ? { background: '#7BB8A4', color: '#fff' } : { color: '#8A8A8A' }}>🌿 向き合う</button>
+            style={mode === 'listen' ? { background: '#7BB8A4', color: '#fff' } : { color: '#8A8A8A' }}>🌿 親身に相談</button>
         </div>
       </div>
 
@@ -279,7 +319,7 @@ function ChatScreen({ profile, avatar }) {
         {history.map((h, i) => (
           <div key={i} className={`flex mb-3 ${h.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {h.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mr-2" style={{ background: '#fff', fontSize: 14 }}>{avatar.icon}</div>
+              <AvatarBadge avatar={avatar} size={28} />
             )}
             <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed" style={{
               maxWidth: '75%',
@@ -294,7 +334,7 @@ function ChatScreen({ profile, avatar }) {
         ))}
         {isLoading && (
           <div className="flex justify-start mb-3">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mr-2" style={{ background: '#fff', fontSize: 14 }}>{avatar.icon}</div>
+            <AvatarBadge avatar={avatar} size={28} />
             <div className="rounded-2xl px-4 py-2.5 text-sm" style={{ background: '#fff', color: '#B0AA9C' }}>…</div>
           </div>
         )}
@@ -367,7 +407,7 @@ ${todayText}`;
           </button>
           {openId === e.id && e.comment && (
             <div className="flex items-start gap-2 mt-3 pt-3" style={{ borderTop: '1px solid #F0EBE0' }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#F5F0E8', fontSize: 14 }}>{avatar.icon}</div>
+              <AvatarBadge avatar={avatar} size={28} />
               <div className="text-sm leading-relaxed" style={{ color: '#3D3D3D' }}>{e.comment}</div>
             </div>
           )}
@@ -462,10 +502,13 @@ function SettingsScreen({ profile, setProfile, avatar, setAvatar }) {
 
   return (
     <div className="px-4 py-4 overflow-y-auto space-y-4" style={{ height: 'calc(100vh - 64px)', background: '#F5F0E8' }}>
-      <div className="rounded-2xl p-4" style={{ background: '#fff' }}>
-        <div className="text-sm font-bold mb-3" style={{ color: '#3D3D3D' }}>アバター設定</div>
-        <div className="text-xs mb-1" style={{ color: '#8A8A8A' }}>関係性：{avatar.relationship} / 口調：{avatar.tone}</div>
-        <div className="text-xs" style={{ color: '#8A8A8A' }}>アバターの変更は今後のアップデートで対応予定です</div>
+      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: '#fff' }}>
+        <AvatarBadge avatar={avatar} size={48} />
+        <div className="flex-1">
+          <div className="text-sm font-bold mb-1" style={{ color: '#3D3D3D' }}>アバター設定</div>
+          <div className="text-xs mb-1" style={{ color: '#8A8A8A' }}>関係性：{avatar.relationship} / 口調：{avatar.tone}</div>
+          <div className="text-xs" style={{ color: '#8A8A8A' }}>アバターの変更は今後のアップデートで対応予定です</div>
+        </div>
       </div>
 
       <div className="rounded-2xl p-4" style={{ background: '#fff' }}>
