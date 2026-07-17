@@ -58,6 +58,17 @@ export function showGlobalUpgradeModal(message) {
         <div style="border-radius:12px;padding:14px;background:#E8F0F5;margin-bottom:16px;">
           <div style="font-size:13px;font-weight:700;color:#3A6B96;margin-bottom:4px;">本契約について</div>
           <div style="font-size:12px;line-height:1.6;color:#3A6B96;">本契約となると、お客様ご自身でAIサービス（Anthropic社）とご契約いただき、そのAPIキーを設定していただく形になります。設定後は、ほぼ無制限でご利用いただけます（利用料はお客様とAnthropic社の直接契約分のみ）。</div>
+          <button id="__ai_apikey_toggle" style="margin-top:8px;font-size:11px;font-weight:700;color:#3A6B96;background:none;border:none;text-decoration:underline;padding:0;">「APIキー」って何？申し込み後の流れは？</button>
+          <div id="__ai_apikey_detail" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #C9D9E5;font-size:11.5px;line-height:1.7;color:#3A6B96;">
+            <b>APIキーとは：</b>AIを動かすための「合言葉」のようなものです。ご自身でAnthropic社に登録すると発行されます（5分程度、クレジットカード登録が必要です）。<br><br>
+            <b>お申し込み後の流れ：</b><br>
+            ①下の「お申し込み」から決済<br>
+            ②数分〜数十分でメールにパスコードが届く<br>
+            ③アプリの「設定」にパスコードを入力<br>
+            ④ご自身でAnthropic社のAPIキーを取得（初回のみ）<br>
+            ⑤取得したキーをアプリに貼り付けて完了、以降ほぼ無制限に<br><br>
+            ご不明な点は「公式LINEで相談する」からいつでも聞いてください。
+          </div>
         </div>
         <a href="#mikata-stripe-link-here" target="_blank" rel="noopener" id="__ai_limit_pay" style="display:block;text-align:center;padding:13px;border-radius:12px;background:#E8A87C;color:#fff;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:10px;">💳 お申し込み（決済ページへ）</a>
         <a href="https://line.me/R/ti/p/@tig9045i" target="_blank" rel="noopener" id="__ai_limit_line" style="display:block;text-align:center;padding:13px;border-radius:12px;background:#06C755;color:#fff;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:10px;">💬 まずは公式LINEで相談する</a>
@@ -69,6 +80,10 @@ export function showGlobalUpgradeModal(message) {
   const close = () => { overlay.remove(); };
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   overlay.querySelector('#__ai_limit_close').addEventListener('click', close);
+  overlay.querySelector('#__ai_apikey_toggle').addEventListener('click', () => {
+    const detail = overlay.querySelector('#__ai_apikey_detail');
+    detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+  });
 }
 
 // ── AI呼び出しの共通窓口 ──
