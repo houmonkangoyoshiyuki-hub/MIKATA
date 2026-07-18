@@ -82,7 +82,7 @@ function OnboardStep1({ onNext }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6" style={{ background: '#F5F0E8' }}>
       <div className="text-5xl mb-4">🌿</div>
-      <div className="text-2xl font-bold mb-2" style={{ color: '#3D3D3D' }}>ずっとMIKATA</div>
+      <div className="text-2xl font-bold mb-2" style={{ color: '#3D3D3D' }}>アシスタント</div>
       <div className="text-sm text-center mb-5 leading-relaxed" style={{ color: '#6B6B6B' }}>
         毎日話せる、あなたの味方。<br />チャットと交換日記で、自分と向き合えます。
       </div>
@@ -95,7 +95,7 @@ function OnboardStep1({ onNext }) {
         はじめる
       </button>
       <div className="text-xs text-center mt-6 leading-relaxed max-w-xs" style={{ color: '#8A8A8A' }}>
-        ずっとMIKATAは医療行為・カウンセリングではありません。会話・日記データはお使いの端末のみに保存されます。
+        アシスタントは医療行為・カウンセリングではありません。会話・日記データはお使いの端末のみに保存されます。
       </div>
     </div>
   );
@@ -186,7 +186,7 @@ function OnboardStep3({ onComplete }) {
 
   return (
     <div className="min-h-screen px-5 py-8" style={{ background: '#F5F0E8' }}>
-      <div className="text-lg font-bold mb-1" style={{ color: '#3D3D3D' }}>MIKATAのすがたを決めましょう</div>
+      <div className="text-lg font-bold mb-1" style={{ color: '#3D3D3D' }}>アシスタントのすがたを決めましょう</div>
       <div className="text-xs mb-6" style={{ color: '#8A8A8A' }}>あとから設定でいつでも変更できます</div>
 
       <div className="mb-5">
@@ -302,7 +302,7 @@ function ChatScreen({ profile, avatar }) {
       <div className="flex items-center justify-between px-4 py-3" style={{ background: '#fff', borderBottom: '1px solid #E5DFD3' }}>
         <div className="flex items-center gap-2">
           <AvatarBadge avatar={avatar} size={32} />
-          <span className="text-sm font-bold" style={{ color: '#3D3D3D' }}>MIKATA</span>
+          <span className="text-sm font-bold" style={{ color: '#3D3D3D' }}>アシスタント</span>
         </div>
         <div className="flex rounded-full p-0.5" style={{ background: '#F0EBE0' }}>
           <button onClick={() => setMode('talk')} className="text-xs font-bold px-3 py-1.5 rounded-full"
@@ -395,7 +395,7 @@ ${todayText}`;
         <textarea value={todayText} onChange={(e) => setTodayText(e.target.value)} placeholder="今日あったこと、感じたことを自由に書いてください"
           className="w-full h-28 rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={{ background: '#F5F0E8', color: '#3D3D3D', border: 'none' }} />
         <button onClick={submitDiary} disabled={isLoading} className="w-full mt-3 py-3 rounded-xl text-sm font-bold disabled:opacity-50" style={{ background: '#E8A87C', color: '#fff' }}>
-          {isLoading ? 'MIKATAが読んでいます…' : 'MIKATAに読んでもらう'}
+          {isLoading ? 'アシスタントが読んでいます…' : 'アシスタントに読んでもらう'}
         </button>
       </div>
 
@@ -434,7 +434,7 @@ function SummaryScreen() {
         setIsLoading(false);
         return;
       }
-      const chatText = chatHistory.slice(-30).map((h) => `${h.role === 'user' ? '本人' : 'MIKATA'}: ${h.text}`).join('\n');
+      const chatText = chatHistory.slice(-30).map((h) => `${h.role === 'user' ? '本人' : 'アシスタント'}: ${h.text}`).join('\n');
       const diaryText = diary.slice(0, 10).map((d) => `${d.date}: ${d.text}`).join('\n');
       const prompt = `以下の会話・日記の記録を要約してください。気持ちの変化・よく出てくるテーマ・最近の状態を簡潔にまとめてください。箇条書き＋短い文章で出力してください。専門用語は使わず、本人や周囲が読んでわかる言葉で。
 
@@ -539,7 +539,7 @@ function SettingsScreen({ profile, setProfile, avatar, setAvatar }) {
       </div>
 
       <div className="rounded-2xl p-4 text-xs leading-relaxed" style={{ background: '#fff', color: '#8A8A8A' }}>
-        ずっとMIKATAは医療行為・カウンセリングではありません。危機的な状況の場合は専門機関にご相談ください。会話・日記データはお使いの端末のみに保存されます。Claude APIとの通信はAnthropic社のプライバシーポリシーに準拠します。このアプリを通じて個人情報が開発者に送信されることはありません。
+        アシスタントは医療行為・カウンセリングではありません。危機的な状況の場合は専門機関にご相談ください。会話・日記データはお使いの端末のみに保存されます。Claude APIとの通信はAnthropic社のプライバシーポリシーに準拠します。このアプリを通じて個人情報が開発者に送信されることはありません。
       </div>
     </div>
   );
