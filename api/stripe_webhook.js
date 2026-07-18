@@ -1,13 +1,8 @@
-// api/stripe_webhook.js
-// Stripeの決済完了イベントを受け取り、自動でランダムなパスコードを発行してVercel KVに保存し、
-// お客様のメールアドレスに自動でパスコードを送信する。
-// 丹羽さんは admin_codes.js（管理用ページ）で発行履歴を確認できる（バックアップ用）。
-
 import Stripe from 'stripe';
 
 export const config = {
   api: {
-    bodyParser: false, // Stripeの署名検証には「生のボディ」が必要なため、自動パースを無効化
+    bodyParser: false,
   },
 };
 
@@ -21,8 +16,7 @@ function getRawBody(req) {
 }
 
 function generatePasscode() {
-  // 例: NC-8F2K-93XL のような読みやすいランダムコード
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0,O,1,I)は除外
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const randPart = (len) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   return `NC-${randPart(4)}-${randPart(4)}`;
 }
@@ -94,55 +88,45 @@ export default async function handler(req, res) {
     return;
   }
 
-  // 決済完了・サブスク更新のイベントで、新しいパスコードを発行する
   if (event.type === 'checkout.session.completed' || event.type === 'invoice.payment_succeeded') {
     try {
       const obj = event.data.object;
 
-      // ── 重複防止：同じ請求書(invoice)由来のイベントで2重発行しないようにする ──
-      // checkout.session.completed には invoice ID が含まれることがあり、
-      // それに対応する invoice.payment_succeeded も別途発生するため、片方だけ処理する。
-      const dedupeId = obj.invoice || obj.id; // invoice IDがあればそれを優先、なければセッション/請求書自体のID
+      const dedupeId = obj.invoice || obj.id;
       const dedupeKey = `webhook_processed:${dedupeId}`;
-      const alreadyProcessed = await kvCommand(['GET', dedupeKey]);
-      if (alreadyProcessed) {
+      // SET ... NX EX は「まだキーが存在しない時だけ設定する」というアトミックな操作。
+      // これにより、ほぼ同時に2つの通知が来ても、片方しか処理が通らないようにする。
+      const setResult = await kvCommand(['SET', dedupeKey, '1', 'NX', 'EX', '2592000']);
+      if (setResult !== 'OK') {
         res.status(200).json({ received: true, skipped: 'duplicate' });
         return;
       }
-      await kvCommand(['SET', dedupeKey, '1']);
-      await kvCommand(['EXPIRE', dedupeKey, '2592000']); // 30日で自動削除
 
       const customerEmail = obj.customer_details?.email || obj.customer_email || '(メール不明)';
       const code = generatePasscode();
       const now = new Date();
       const stamp = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      // 決済金額からプランを判定（600円未満なら「プチ課金＝basic」、それ以上なら「本契約＝valid」）
-      // ※JPYは0桁通貨のため、Stripeのamount_totalは実際の円数がそのまま入る（例:500円→500）
       const amountTotal = obj.amount_total ?? obj.amount_paid ?? obj.total ?? 0;
       const tier = amountTotal > 0 && amountTotal < 600 ? 'basic' : 'valid';
 
-      // 有効なコードとして保存（アプリ側の照合に使う）
       await kvCommand(['SET', `passcode:${code}`, tier]);
 
-      // 管理画面用の一覧に追加（新しい順、最大50件）
       const listKey = 'passcode_list';
       let list = [];
       try {
         const existing = await kvCommand(['GET', listKey]);
         list = existing ? JSON.parse(existing) : [];
       } catch (e) {}
-      list.unshift({ code, email: customerEmail, stamp });
+      list.unshift({ code, email: customerEmail, stamp, tier });
       list = list.slice(0, 50);
       await kvCommand(['SET', listKey, JSON.stringify(list)]);
 
-      // お客様に自動でメール送信
       await sendPasscodeEmail(customerEmail, code, process.env.APP_DISPLAY_NAME || 'アプリ');
 
-      console.log(`New passcode issued: ${code} for ${customerEmail}`);
+      console.log(`New passcode issued: ${code} (${tier}) for ${customerEmail}`);
     } catch (err) {
       console.error('Error issuing passcode:', err.message);
-      // Stripeへは200を返す（再送を防ぐ。エラーはログで確認する）
     }
   }
 
